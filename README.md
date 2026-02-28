@@ -1,11 +1,12 @@
 # python-backend-automation-api
 
-Production-ready FastAPI backend demonstrating layered architecture,
-validation, service abstraction, database integration, testing, and
-containerized deployment.
+Production-ready FastAPI backend demonstrating layered architecture,\
+database integrity rules, service-layer abstraction, deterministic
+testing,\
+and containerized deployment.
 
-This repository is designed to showcase backend engineering practices
-suitable for real-world API systems and automation workflows.
+This repository showcases production-oriented backend engineering
+practices rather than tutorial-style CRUD scaffolding.
 
 ------------------------------------------------------------------------
 
@@ -13,21 +14,34 @@ suitable for real-world API systems and automation workflows.
 
 This project implements a **Lead Capture & Processing API** with:
 
--   Modular routing
--   Pydantic request/response validation
--   Service layer abstraction
--   Database integration
--   Centralized configuration management
--   Structured logging
+-   Layered routing → service → persistence architecture\
+-   Pydantic v2 request/response validation\
+-   SQLAlchemy 2.0 ORM integration\
+-   Database-level uniqueness constraint enforcement\
+-   Proper HTTP semantics (201, 409)\
+-   Structured application logging\
+-   Environment-driven configuration\
+-   Deterministic in-memory database testing\
 -   Dockerized deployment
--   Automated test coverage
 
-The goal is to demonstrate production-oriented backend architecture
-rather than a tutorial-style implementation.
+The goal is to demonstrate clean backend design suitable for real-world
+API and automation systems.
 
 ------------------------------------------------------------------------
 
 ## Architecture
+
+### Layered Flow
+
+``` mermaid
+flowchart TD
+    A[Client] -->|HTTP| B[FastAPI Routes]
+    B --> C[Service Layer]
+    C --> D[SQLAlchemy ORM]
+    D --> E[(SQLite Database)]
+```
+
+### Project Structure
 
     app/
      ├── main.py              # Application entrypoint
@@ -35,22 +49,14 @@ rather than a tutorial-style implementation.
      │    ├── routes/         # API endpoint modules
      │    └── dependencies.py # Dependency injection
      ├── services/            # Business logic layer
-     ├── models/              # Database models
-     ├── schemas.py           # Pydantic validation schemas
-     ├── database.py          # Database setup and session management
+     ├── models/              # SQLAlchemy ORM models
+     ├── schemas.py           # Pydantic request/response models
+     ├── database.py          # Engine + session management
      ├── config.py            # Environment configuration
-     ├── logger.py            # Centralized logging setup
+     ├── logger.py            # Structured logging config
     tests/                    # Pytest test suite
-    Dockerfile                # Container build config
+    Dockerfile                # Container image
     docker-compose.yml        # Local orchestration
-
-### Design Principles
-
--   Clear separation between routing and business logic
--   Explicit dependency management
--   Configurable via environment variables
--   Ready for containerized environments
--   Test-driven endpoint verification
 
 ------------------------------------------------------------------------
 
@@ -59,8 +65,6 @@ rather than a tutorial-style implementation.
 ### Health Check
 
 `GET /health`
-
-Response:
 
 ``` json
 {
@@ -78,18 +82,35 @@ Request:
 
 ``` json
 {
-  "name": "John Doe",
-  "email": "john@example.com"
+  "full_name": "John Doe",
+  "email": "john@example.com",
+  "company": "Example Inc",
+  "message": "Interested in product",
+  "source": "landing-page"
 }
 ```
 
-Response:
+Response (201):
 
 ``` json
 {
   "id": 1,
-  "name": "John Doe",
-  "email": "john@example.com"
+  "full_name": "John Doe",
+  "email": "john@example.com",
+  "company": "Example Inc",
+  "message": "Interested in product",
+  "source": "landing-page",
+  "created_at": "2026-02-28T10:00:00Z"
+}
+```
+
+Duplicate email returns:
+
+409 Conflict
+
+``` json
+{
+  "detail": "Lead with this email already exists."
 }
 ```
 
@@ -99,95 +120,93 @@ Response:
 
 `GET /leads`
 
-Returns all stored leads.
+Returns:
+
+``` json
+{
+  "total": 1,
+  "items": []
+}
+```
+
+Supports:
+
+-   `limit`
+-   `offset`
 
 ------------------------------------------------------------------------
 
 ## Running Locally
 
-Create virtual environment:
-
-    python -m venv .venv
-    source .venv/bin/activate    # Windows: .venv\Scripts\activate
-    pip install -r requirements.txt
-
-Run application:
-
-    uvicorn app.main:app --reload
+``` bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
 Open:
 
-    http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/docs
 
 ------------------------------------------------------------------------
 
 ## Running with Docker
 
-Build and start:
-
-    docker compose up --build
+``` bash
+docker compose up --build
+```
 
 Application runs at:
 
-    http://localhost:8000
+http://localhost:8000/docs
 
 ------------------------------------------------------------------------
 
 ## Testing
 
-Run tests with:
+``` bash
+pytest
+```
 
-    pytest
+Tests include:
 
-Tests cover:
-
--   Health endpoint
--   Lead creation
--   Lead retrieval
+-   Health endpoint validation\
+-   Lead creation success case\
+-   Duplicate email conflict handling\
+-   Isolated in-memory SQLite engine using StaticPool
 
 ------------------------------------------------------------------------
 
 ## Environment Configuration
 
-Environment variables can be configured via `.env` file.
+Example `.env`:
 
-Example:
+    DATABASE_URL=sqlite:///./app.db
+    ENV=local
+    LOG_LEVEL=INFO
 
-    DATABASE_URL=sqlite:///./test.db
-    APP_ENV=development
-
-A `.env.example` file documents expected configuration keys.
-
-------------------------------------------------------------------------
-
-## Future Improvements
-
--   Pagination and filtering for `/leads`
--   Authentication layer (JWT or API key)
--   Async database driver support
--   CI pipeline integration
--   Extended test coverage
--   Production logging configuration
+`.env.example` documents expected keys.
 
 ------------------------------------------------------------------------
 
 ## Tech Stack
 
--   Python 3.12
--   FastAPI
--   Pydantic
--   SQLAlchemy (if used)
--   Pytest
+-   Python 3.12\
+-   FastAPI\
+-   SQLAlchemy 2.0\
+-   Pydantic v2\
+-   SQLite\
+-   Pytest\
 -   Docker
 
 ------------------------------------------------------------------------
 
 ## Purpose
 
-This repository is part of a curated backend engineering portfolio
-focused on:
+This repository is part of a backend engineering portfolio focused on:
 
--   Automation systems
--   API architecture
--   Production-ready Python services
--   Scalable application structure
+-   Automation systems\
+-   Clean API architecture\
+-   Production-oriented Python services\
+-   Scalable layered application design
