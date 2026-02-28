@@ -1,89 +1,193 @@
 # python-backend-automation-api
 
-Production-oriented FastAPI backend showcasing clean architecture, validation, service separation, logging, Docker, and tests.
+Production-ready FastAPI backend demonstrating layered architecture,
+validation, service abstraction, database integration, testing, and
+containerized deployment.
 
-## Run locally
+This repository is designed to showcase backend engineering practices
+suitable for real-world API systems and automation workflows.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+------------------------------------------------------------------------
 
-# Python Backend Automation API
+## Overview
 
-Production-ready FastAPI backend demonstrating:
+This project implements a **Lead Capture & Processing API** with:
 
-- Layered architecture (routes → services → models)
-- SQLAlchemy 2.0 ORM
-- Business rule enforcement (unique email constraint)
-- Proper HTTP semantics (201, 409)
-- Deterministic automated tests
-- In-memory database isolation for testing
-- Dockerized deployment
-- OpenAPI documentation
+-   Modular routing
+-   Pydantic request/response validation
+-   Service layer abstraction
+-   Database integration
+-   Centralized configuration management
+-   Structured logging
+-   Dockerized deployment
+-   Automated test coverage
 
----
+The goal is to demonstrate production-oriented backend architecture
+rather than a tutorial-style implementation.
+
+------------------------------------------------------------------------
 
 ## Architecture
 
-app/
-- api/ → HTTP layer
-- services/ → business logic
-- models/ → ORM models
-- schemas.py → Pydantic validation
-- database.py → SQLAlchemy engine/session
-- config.py → environment configuration
+    app/
+     ├── main.py              # Application entrypoint
+     ├── api/
+     │    ├── routes/         # API endpoint modules
+     │    └── dependencies.py # Dependency injection
+     ├── services/            # Business logic layer
+     ├── models/              # Database models
+     ├── schemas.py           # Pydantic validation schemas
+     ├── database.py          # Database setup and session management
+     ├── config.py            # Environment configuration
+     ├── logger.py            # Centralized logging setup
+    tests/                    # Pytest test suite
+    Dockerfile                # Container build config
+    docker-compose.yml        # Local orchestration
 
----
+### Design Principles
 
-## Features
+-   Clear separation between routing and business logic
+-   Explicit dependency management
+-   Configurable via environment variables
+-   Ready for containerized environments
+-   Test-driven endpoint verification
 
-- Create lead (POST /leads)
-- List leads (GET /leads)
-- Unique email validation
-- Proper conflict handling (409)
-- Health endpoint (GET /health)
+------------------------------------------------------------------------
 
----
+## API Endpoints
 
-## Run Locally
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+### Health Check
 
+`GET /health`
+
+Response:
+
+``` json
+{
+  "status": "ok"
+}
+```
+
+------------------------------------------------------------------------
+
+### Create Lead
+
+`POST /leads`
+
+Request:
+
+``` json
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+Response:
+
+``` json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+------------------------------------------------------------------------
+
+### List Leads
+
+`GET /leads`
+
+Returns all stored leads.
+
+------------------------------------------------------------------------
+
+## Running Locally
+
+Create virtual environment:
+
+    python -m venv .venv
+    source .venv/bin/activate    # Windows: .venv\Scripts\activate
+    pip install -r requirements.txt
+
+Run application:
+
+    uvicorn app.main:app --reload
 
 Open:
 
-http://localhost:8000/docs
+    http://127.0.0.1:8000/docs
 
----
+------------------------------------------------------------------------
 
-## Run with Docker
-docker compose build
-docker compose up
+## Running with Docker
 
+Build and start:
 
-Open:
+    docker compose up --build
 
-http://localhost:8000/docs
+Application runs at:
 
----
+    http://localhost:8000
+
+------------------------------------------------------------------------
 
 ## Testing
-python -m pytest
 
+Run tests with:
 
-Tests use an isolated in-memory SQLite database with StaticPool to ensure deterministic behavior.
+    pytest
 
----
+Tests cover:
+
+-   Health endpoint
+-   Lead creation
+-   Lead retrieval
+
+------------------------------------------------------------------------
+
+## Environment Configuration
+
+Environment variables can be configured via `.env` file.
+
+Example:
+
+    DATABASE_URL=sqlite:///./test.db
+    APP_ENV=development
+
+A `.env.example` file documents expected configuration keys.
+
+------------------------------------------------------------------------
+
+## Future Improvements
+
+-   Pagination and filtering for `/leads`
+-   Authentication layer (JWT or API key)
+-   Async database driver support
+-   CI pipeline integration
+-   Extended test coverage
+-   Production logging configuration
+
+------------------------------------------------------------------------
 
 ## Tech Stack
 
-- FastAPI
-- SQLAlchemy 2.0
-- Pydantic v2
-- SQLite
-- Pytest
-- Docker
+-   Python 3.12
+-   FastAPI
+-   Pydantic
+-   SQLAlchemy (if used)
+-   Pytest
+-   Docker
+
+------------------------------------------------------------------------
+
+## Purpose
+
+This repository is part of a curated backend engineering portfolio
+focused on:
+
+-   Automation systems
+-   API architecture
+-   Production-ready Python services
+-   Scalable application structure
